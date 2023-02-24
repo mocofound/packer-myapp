@@ -12,20 +12,20 @@ packer {
   }
 }
 
-# variable "subscription_id" {
-#     type        = string
-#     sensitive   = true
-# }
+variable "subscription_id" {
+    type        = string
+    sensitive   = true
+}
 
-# variable "client_id" {
-#     type        = string
-#     sensitive   = true
-# }
+variable "client_id" {
+    type        = string
+    sensitive   = true
+}
 
-# variable "client_secret" {
-#     type        = string
-#     sensitive   = true
-# }
+variable "client_secret" {
+    type        = string
+    sensitive   = true
+}
 
 variable "default_base_tags" {
   description = "Required tags for the environment"
@@ -36,28 +36,15 @@ variable "default_base_tags" {
   }
 }
 
-data "amazon-ami" "hashistack" {
+data "amazon-ami" "base_image" {
+  region = "us-east-1"
   filters = {
-    architecture                       = "x86_64"
-    "block-device-mapping.volume-type" = "gp2"
-    name                               = "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"
-    root-device-type                   = "ebs"
-    virtualization-type                = "hvm"
+    name             = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+    root-device-type = "ebs"
   }
   most_recent = true
   owners      = ["099720109477"]
-  region      = "us-east-1"
 }
-
-# data "amazon-ami" "base_image" {
-#   region = "us-east-1"
-#   filters = {
-#     name             = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
-#     root-device-type = "ebs"
-#   }
-#   most_recent = true
-#   owners      = ["099720109477"]
-# }
 
 source "amazon-ebs" "myapp" {
   region         = "us-east-1"
@@ -71,22 +58,22 @@ source "amazon-ebs" "myapp" {
   })
 }
 
-# source "azure-arm" "myapp" {
-#   image_offer                       = "0001-com-ubuntu-server-jammy"
-#   image_publisher                   = "Canonical"
-#   image_sku                         = "22_04-lts"
-#   location                          = "East US"
-#   managed_image_name                = "hcp_packer_demo_app_{{timestamp}}"
-#   managed_image_resource_group_name = "hcp_packer_demo_app"
-#   os_type                           = "Linux"
-#   vm_size                           = "Standard_DS2_v2"
-#   subscription_id                   = var.subscription_id
-#   client_id                         = var.client_id
-#   client_secret                     = var.client_secret
-#   azure_tags = merge(var.default_base_tags, {
-#     MyTags = "MyAzureTags"
-#   })
-# }
+source "azure-arm" "myapp" {
+  image_offer                       = "0001-com-ubuntu-server-jammy"
+  image_publisher                   = "Canonical"
+  image_sku                         = "22_04-lts"
+  location                          = "East US"
+  managed_image_name                = "hcp_packer_demo_app_{{timestamp}}"
+  managed_image_resource_group_name = "hcp_packer_demo_app"
+  os_type                           = "Linux"
+  vm_size                           = "Standard_DS2_v2"
+  subscription_id                   = var.subscription_id
+  client_id                         = var.client_id
+  client_secret                     = var.client_secret
+  azure_tags = merge(var.default_base_tags, {
+    MyTags = "MyAzureTags"
+  })
+}
 
 build {
     hcp_packer_registry {
@@ -103,10 +90,8 @@ build {
       }
     }
 
-  sources = ["source.amazon-ebs.myapp",]
-
-  // sources = ["source.amazon-ebs.myapp",
-  //            "source.azure-arm.myapp"]
+  sources = ["source.amazon-ebs.myapp",
+             "source.azure-arm.myapp"]
 
   // Copy binary to tmp
   provisioner "file" {
