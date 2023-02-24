@@ -36,15 +36,28 @@ variable "default_base_tags" {
   }
 }
 
-data "amazon-ami" "base_image" {
-  region = "us-east-1"
+data "amazon-ami" "hashistack" {
   filters = {
-    name             = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
-    root-device-type = "ebs"
+    architecture                       = "x86_64"
+    "block-device-mapping.volume-type" = "gp2"
+    name                               = "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"
+    root-device-type                   = "ebs"
+    virtualization-type                = "hvm"
   }
   most_recent = true
   owners      = ["099720109477"]
+  region      = "us-east-1"
 }
+
+# data "amazon-ami" "base_image" {
+#   region = "us-east-1"
+#   filters = {
+#     name             = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+#     root-device-type = "ebs"
+#   }
+#   most_recent = true
+#   owners      = ["099720109477"]
+# }
 
 source "amazon-ebs" "myapp" {
   region         = "us-east-1"
